@@ -1365,6 +1365,108 @@ document.querySelectorAll(".back-btn").forEach(btn => {
   btn.addEventListener("click", goHome);
 });
 
+// ===========================
+// Arduino 연결 관련 코드
+// ===========================
+
+let arduinoPort = null;
+let arduinoWriter = null;
+let isArduinoConnected = false;
+
+function setArduinoStatus(text) {
+  const el = document.getElementById("arduino-status");
+  if (el) el.textContent = text;
+}
+
+async function toggleArduinoConnection() {
+  try {
+    // 아직 연결 안 됐으면 → 연결
+    if (!isArduinoConnected) {
+      if (!("serial" in navigator)) {
+        alert("이 브라우저에서는 Web Serial API를 지원하지 않습니다. (Chrome/Edge 사용 권장)");
+        return;
+      }
+
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 9600 }); // ⚠ 아두이노 코드의 Serial.begin(9600)과 동일하게
+
+      const textEncoder = new TextEncoderStream();
+      textEncoder.readable.pipeTo(port.writable);
+      const writer = textEncoder.writable.getWriter();
+
+      arduinoPort = port;
+      arduinoWriter = writer;
+      isArduinoConnected = true;
+
+      const btn = document.getElementById("connect-arduino-btn");
+      if (btn) btn.textContent = "Disconnect Arduino";
+      setArduinoStatus("Connected");
+      console.log("Arduino connected");
+    }
+    // 이미 연결되어 있으면 → 해제
+    else {
+      if (arduinoWriter) {
+        await arduinoWriter.close();
+      }
+      if (arduinoPort) {
+        await arduinoPort.close();
+      }
+
+      arduinoPort = null;
+      arduinoWriter = null;
+      isArduinoConnected = false;
+
+      const btn = document.getElementById("connect-arduino-btn");
+      if (btn) btn.textContent = "Connect Arduino";
+      setArduinoStatus("Not connected");
+      console.log("Arduino disconnected");
+    }
+  } catch (err) {
+    console.error("Arduino connection error:", err);
+    alert("Arduino 연결 중 오류가 발생했습니다. 콘솔을 확인해 주세요.");
+  }
+}
+
+// 페이지 로드되면 버튼 이벤트 연결
+document.addEventListener("DOMContentLoaded", () => {
+  const connectBtn = document.getElementById("connect-arduino-btn");
+  if (connectBtn) {
+    connectBtn.addEventListener("click", toggleArduinoConnection);
+  }
+});
+
+/**
+ * 칼로리를 아두이노로 보내는 함수
+ * @param {number} totalCalories - 한 끼 칼로리 값
+ */
+async function sendCaloriesToArduino(totalCalories) {
+  const useArduinoToggle = document.getElementById("use-arduino-toggle");
+  const useArduino = useArduinoToggle ? useArduinoToggle.checked : false;
+
+  // 체크박스 꺼져 있거나 / 연결 안 되어 있으면 전송 X
+  if (!useArduino || !isArduinoConnected || !arduinoWriter) {
+    console.log("Arduino not used or not connected. Skip sending.");
+    return;
+  }
+
+  let command = "";
+
+  // 🔥 여기 기준은 팀에서 정한 기준에 맞게 수정 가능
+  if (totalCalories > 700) {
+    command = "RED";      // 아두이노에서 cmd == "RED"
+  } else if (totalCalories > 400) {
+    command = "YELLOW";   // cmd == "YELLOW"
+  } else {
+    command = "GREEN";    // cmd == "GREEN"
+  }
+
+  try {
+    await arduinoWriter.write(command + "\n"); // 아두이노에서 readStringUntil('\n') 쓰니까 개행 같이 전송
+    console.log(`Sent to Arduino: ${command} (calories: ${totalCalories})`);
+  } catch (err) {
+    console.error("Error sending data to Arduino:", err);
+  }
+}
 
 
 
