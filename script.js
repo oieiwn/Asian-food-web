@@ -1240,6 +1240,8 @@ async function predict(img) {
     </div>
     ${compareSection}
   `;
+    // 아두이노로 칼로리 전송
+  sendCaloriesToArduino(info.calories);
 
   // 🔍 이미지 버튼 클릭 시 구글 이미지 검색 열기
   const imgBtns = resultCountry.querySelectorAll(".compare-img-btn");
