@@ -923,6 +923,25 @@ body.show-detail .home-menu {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* Arduino 연결 UI 스타일 */
+#arduino-connection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+#connect-arduino-btn {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#arduino-status {
+  opacity: 0.8;
+}
 
 
 
