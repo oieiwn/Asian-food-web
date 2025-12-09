@@ -7,6 +7,12 @@ console.log("script.js loaded");
  * TEACHABLE MACHINE MODEL
  **********************/
 const MODEL_URL = "https://teachablemachine.withgoogle.com/models/SCrCm4nRI/";
+//아두이노 상태 변수들
+let arduinoPort = null;
+let arduinoWriter = null;
+let isArduinoConnected = false;
+let lastCalories = null;
+
 
 // HTML Elements – Food Classifier
 const fileInput = document.getElementById("image-input");
@@ -1375,10 +1381,6 @@ document.querySelectorAll(".back-btn").forEach(btn => {
 // Arduino 연결 관련 코드
 // ===========================
 
-let arduinoPort = null;
-let arduinoWriter = null;
-let isArduinoConnected = false;
-let lastCalories = null;
 
 function setArduinoStatus(text) {
   const el = document.getElementById("arduino-status");
