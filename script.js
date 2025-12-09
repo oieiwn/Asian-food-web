@@ -1445,20 +1445,29 @@ async function sendCaloriesToArduino(totalCalories) {
   const useArduinoToggle = document.getElementById("use-arduino-toggle");
   const useArduino = useArduinoToggle ? useArduinoToggle.checked : false;
 
-  if (!useArduino || !isArduinoConnected || !arduinoWriter) {
-    console.log("Arduino not used or not connected. Skip sending.");
+  console.log("DEBUG sendCaloriesToArduino", {
+    totalCalories,
+    useArduino,
+    isArduinoConnected,
+    hasWriter: !!arduinoWriter
+  });
+
+  // ✅ 디버깅을 위해 일단 체크박스는 무시하고,
+  //    "연결만 되어 있으면" 보내도록 바꿈
+  if (!isArduinoConnected || !arduinoWriter) {
+    console.log("Arduino NOT ready (connected:", isArduinoConnected,
+                "writer:", !!arduinoWriter, "). Skip sending.");
     return;
   }
 
   let command = "";
 
-  // 웹에서 보여주는 기준과 정확히 맞춤
   if (totalCalories > 700) {
-    command = "RED";       // 🔴 > 700 kcal
+    command = "RED";       // 🔴 > 700
   } else if (totalCalories >= 500) {
-    command = "BLUE";      // 🔵 500–700 kcal
+    command = "BLUE";      // 🔵 500~700
   } else {
-    command = "YELLOW";    // 🟡 < 500 kcal
+    command = "YELLOW";    // 🟡 < 500
   }
 
   try {
