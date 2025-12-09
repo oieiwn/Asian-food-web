@@ -1240,7 +1240,11 @@ async function predict(img) {
     </div>
     ${compareSection}
   `;
-    // 아두이노로 칼로리 전송
+
+  //마지막 칼로리 기억해 두기
+  lastCalories = info.calories;
+  
+  // 아두이노로 칼로리 
   sendCaloriesToArduino(info.calories);
 
   // 🔍 이미지 버튼 클릭 시 구글 이미지 검색 열기
@@ -1374,6 +1378,7 @@ document.querySelectorAll(".back-btn").forEach(btn => {
 let arduinoPort = null;
 let arduinoWriter = null;
 let isArduinoConnected = false;
+let lastCalories = null;
 
 function setArduinoStatus(text) {
   const el = document.getElementById("arduino-status");
@@ -1404,6 +1409,10 @@ async function toggleArduinoConnection() {
       if (btn) btn.textContent = "Disconnect Arduino";
       setArduinoStatus("Connected");
       console.log("Arduino connected");
+      // 직전에 예측된 칼로리가 있으면, 지금 바로 한 번 더 전송
+      if (lastCalories !== null){
+        console.log("Arduino connected, sending last calories:", lastCalories);
+        sendCaloriesToArduino(lastCalories);
     }
     // 이미 연결되어 있으면 → 해제
     else {
