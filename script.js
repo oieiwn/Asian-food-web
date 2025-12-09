@@ -1130,15 +1130,6 @@ window.addEventListener("load", async () => {
 fileInput.addEventListener("change", handleUpload);
 
 function handleUpload(e) {
-  // 먼저 아두이노 체크박스 체크 + 연결 여부 확인
-  const useArduinoToggle = document.getElementById("use-arduino-toggle");
-  const useArduino = useArduinoToggle ? useArduinoToggle.checked : false;
-
-  if (useArduino && !isArduinoConnected) {
-    alert("먼저 'Connect Arduino' 버튼으로 아두이노를 연결해 주세요!");
-    fileInput.value = ""; // 파일 초기화
-    return;
-  }
   classifierSection.style.display = "block";  
 
   const file = e.target.files[0];
