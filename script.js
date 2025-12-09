@@ -1445,7 +1445,6 @@ async function sendCaloriesToArduino(totalCalories) {
   const useArduinoToggle = document.getElementById("use-arduino-toggle");
   const useArduino = useArduinoToggle ? useArduinoToggle.checked : false;
 
-  // 체크박스 꺼져 있거나 / 연결 안 되어 있으면 전송 X
   if (!useArduino || !isArduinoConnected || !arduinoWriter) {
     console.log("Arduino not used or not connected. Skip sending.");
     return;
@@ -1453,17 +1452,17 @@ async function sendCaloriesToArduino(totalCalories) {
 
   let command = "";
 
-  // 🔥 여기 기준은 팀에서 정한 기준에 맞게 수정 가능
+  // 웹에서 보여주는 기준과 정확히 맞춤
   if (totalCalories > 700) {
-    command = "RED";      // 아두이노에서 cmd == "RED"
-  } else if (totalCalories > 400) {
-    command = "YELLOW";   // cmd == "YELLOW"
+    command = "RED";       // 🔴 > 700 kcal
+  } else if (totalCalories >= 500) {
+    command = "BLUE";      // 🔵 500–700 kcal
   } else {
-    command = "GREEN";    // cmd == "GREEN"
+    command = "YELLOW";    // 🟡 < 500 kcal
   }
 
   try {
-    await arduinoWriter.write(command + "\n"); // 아두이노에서 readStringUntil('\n') 쓰니까 개행 같이 전송
+    await arduinoWriter.write(command + "\n");
     console.log(`Sent to Arduino: ${command} (calories: ${totalCalories})`);
   } catch (err) {
     console.error("Error sending data to Arduino:", err);
