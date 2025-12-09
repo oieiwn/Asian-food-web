@@ -1,0 +1,275 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Taste Asia: Food & Travel Guide</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- TensorFlow.js & Teachable Machine Image lib -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+</head>
+
+<body>
+  <!-- 전체 헤더 -->
+  <header>
+    <h1>🌍 Taste Asia: Food & Travel Guide</h1>
+    <p class="subtitle">
+      Scan your dish, learn where it's from, and explore restaurants & travel courses.
+    </p>
+  </header>
+
+<section class="home-menu">
+  <!-- 왼쪽: Find Asian Restaurants -->
+  <a href="#restaurant-section" id="card-find-rest" class="menu-card side-card">
+    <div class="menu-label">Find Asian Restaurants</div>
+  </a>
+
+  <!-- 가운데: Asian Food Classifier -->
+  <a href="#food-section" id="card-food-main" class="menu-card center-card">
+    <div class="menu-label big">Asian Food Classifier</div>
+    <div class="menu-sub">Click!</div>
+  </a>
+
+  <!-- 오른쪽: Make 1-day Course -->
+  <a href="#course-section" id="card-course-main" class="menu-card side-card">
+    <div class="menu-label">Make 1-day Course</div>
+  </a>
+</section>
+
+
+
+
+<main class="container hidden-at-start">
+    <div class="two-column-layout">
+      <!-- ================= 왼쪽: 음식 이미지 분류기 ================= -->
+      <section id="classifier-section">
+        <h2 class="section-title">🍱 Asian Food Classifier</h2>
+
+        <!-- 업로드 버튼 -->
+        <label for="image-input" class="upload-btn">📸 Upload Food Image</label>
+        <input type="file" id="image-input" accept="image/*" />
+
+        <!-- 미리보기 -->
+        <div class="preview-area">
+          <img id="preview-image" alt="Preview will appear here" />
+        </div>
+
+        <!-- 상태 -->
+        <p id="status">Model is loading...</p>
+
+        <!-- 메인 결과 + 설명 -->
+        <div id="result-country"></div>
+
+        <!-- 추천 음식 영역 -->
+        <div id="recommendation-box"></div>
+
+        <!-- 음식별 맛집 찾기 버튼 (JS에서 show 클래스 붙여서 보여줌) -->
+        <button id="food-restaurant-btn" type="button" class="sub-btn">
+          🍽️ Find restaurants for this food
+        </button>
+
+        <!-- Top-K 결과 리스트 -->
+        <div id="result-list"></div>
+      </section>
+
+      <!-- ================= 오른쪽: 여행 / 맛집 기능 ================= -->
+      <section id="travel-section">
+        <!-- 메인 선택 화면: 두 가지 모드를 선택 -->
+        <section id="travel-main-menu">
+          <h2 class="section-title">📖 Travel & Restaurant Assistant</h2>
+          <p class="subtitle-mini">
+            Choose what you want to explore. You can always come back to this screen.
+          </p>
+
+          <div class="menu-buttons">
+            <button id="btn-tourist-mode" class="mode-btn">
+              🗺 Make 1-day course
+            </button>
+            <button id="btn-food-mode" class="mode-btn">
+              🍽 Find Asian restaurants
+            </button>
+          </div>
+        </section>
+
+        <!-- ---------- 모드 1: 주변 관광지 추천 (풀사이즈 화면) ---------- -->
+        <section id="tourist-mode" class="travel-mode hidden">
+          <button class="back-btn" type="button">← Back to travel menu</button>
+
+          <h2 class="section-title">🗺 Making 1-day course</h2>
+          <p class="subtitle-mini">
+            We will make 1-day course and show them on Google Maps.
+          </p>
+
+
+  <!-- 🔹 코스 추천 폼 -->
+  <div class="tour-form">
+    <p class="subtitle-mini">
+      type a travel area and choose your travel style to get a 1-day course.
+    </p>
+
+    <!-- 여행 지역 입력 -->
+    <label class="tour-label">
+      Travel area for course
+      <input
+        type="text"
+        id="tour-area-input"
+        placeholder="e.g. Seongsu, Seoul / Shibuya, Tokyo"
+      />
+    </label>
+
+  <!-- 🔹 나라별 대표 지역 예시 버튼 (4나라 × 2개) -->
+  <div class="tour-area-tags">
+    <!-- Korea -->
+    <button type="button" class="tour-area-tag">Seongsu, Seoul</button>
+    <button type="button" class="tour-area-tag">Myeongdong, Seoul</button>
+
+    <!-- Japan -->
+    <button type="button" class="tour-area-tag">Shibuya, Tokyo</button>
+    <button type="button" class="tour-area-tag">Akihabara, Tokyo</button>
+
+    <!-- China -->
+    <button type="button" class="tour-area-tag">The Bund, Shanghai</button>
+    <button type="button" class="tour-area-tag">Wangfujing, Beijing</button>
+
+    <!-- Thailand -->
+    <button type="button" class="tour-area-tag">Siam, Bangkok</button>
+    <button type="button" class="tour-area-tag">Old Town, Chiang Mai</button>
+  </div>
+    <!-- 스타일 선택 버튼 -->
+    <div class="tour-style-row">
+      <span class="tour-style-title">Travel style</span>
+      <div class="tour-style-buttons">
+        <!-- HTML (tour-style-buttons 부분) -->
+        <button type="button" class="tour-style-btn active" data-style="foodculture">
+          🍜 Local Food & Culture
+        </button>
+        <button type="button" class="tour-style-btn" data-style="shopping">
+          🛍 Street Market & Shopping
+        </button>
+        <button type="button" class="tour-style-btn" data-style="night">
+          🌉 Night View & Drinks
+        </button>
+      </div>
+    </div>
+
+    <!-- 코스 생성 버튼 -->
+    <button id="tour-course-btn" type="button" class="sub-btn">
+      ✨ Make my 1-day course
+    </button>
+  </div>
+
+          <div id="tourist-layout">
+            <div id="tourist-list">
+              <!-- JS에서 관광지 4개를 여기 넣음 -->
+            </div>
+            <div id="tourist-map-wrapper">
+              <iframe
+                id="tourist-map"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- 모드 2: 주변 맛집 찾기 (풀사이즈 화면) ---------- -->
+        <section id="restaurant-mode" class="travel-mode hidden">
+          <button class="back-btn" type="button">← Back to travel menu</button>
+
+          <h2 class="section-title">
+            📖 Finding restaurants
+          </h2>
+          <p class="subtitle-mini">
+            Type area or use your current location and we will help you
+            find restaurants on <strong>Google Maps</strong>.
+          </p>
+
+          <div class="travel-form">
+            <!-- Country 선택 -->
+            <label>
+              Country
+              <select id="travel-country">
+                <option value="Korea">Korea</option>
+                <option value="Japan">Japan</option>
+                <option value="China">China</option>
+                <option value="Thailand">Thailand</option>
+              </select>
+            </label>
+
+            <!-- Search mode + How to use 를 가로로 배치 -->
+            <div class="travel-top-row">
+              <!-- 사용법 안내 카드 (왼쪽) -->
+              <div class="hint-card">
+                <h3>✨ How to use</h3>
+                <p>
+                  1. Choose a country<br>
+                  2. Type your travel area or tap a tag<br>
+                  3. We’ll search popular local restaurants on Google Maps.
+                </p>
+              </div>
+
+              <!-- 검색 모드 선택 (오른쪽) -->
+              <div class="search-mode">
+                <p class="search-mode-title">Search mode</p>
+                <label class="radio-label">
+                  <input
+                    type="radio"
+                    name="search-mode"
+                    id="mode-area"
+                    value="area"
+                    checked
+                  />
+                  Search by travel area (city / district)
+                </label>
+              </div>
+            </div>
+
+            <!-- 여행 지역 입력 -->
+            <label>
+              Travel area
+              <input
+                type="text"
+                id="travel-location"
+                placeholder="e.g. Myeongdong, Seoul / Shibuya, Tokyo"
+              />
+            </label>
+
+            <!-- 나라별 대표 도시 태그 (JS로 채움) -->
+            <div class="area-tags"></div>
+
+            <p class="map-note">
+              Results will open in <strong>Google Maps</strong>.
+            </p>
+
+            <!-- 맛집 찾기 버튼 -->
+            <button id="travel-search-btn" type="button">
+              🔍 Find restaurants
+            </button>
+          </div>
+
+          <!-- 검색 결과 텍스트 표시 -->
+          <div id="map-links"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <!-- 메인 스크립트 -->
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
