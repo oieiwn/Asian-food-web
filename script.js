@@ -1130,6 +1130,15 @@ window.addEventListener("load", async () => {
 fileInput.addEventListener("change", handleUpload);
 
 function handleUpload(e) {
+  // 먼저 아두이노 체크박스 체크 + 연결 여부 확인
+  const useArduinoToggle = document.getElementById("use-arduino-toggle");
+  const useArduino = useArduinoToggle ? useArduinoToggle.checked : false;
+
+  if (useArduino && !isArduinoConnected) {
+    alert("먼저 'Connect Arduino' 버튼으로 아두이노를 연결해 주세요!");
+    fileInput.value = ""; // 파일 초기화
+    return;
+  }
   classifierSection.style.display = "block";  
 
   const file = e.target.files[0];
@@ -1409,10 +1418,9 @@ async function toggleArduinoConnection() {
       if (btn) btn.textContent = "Disconnect Arduino";
       setArduinoStatus("Connected");
       console.log("Arduino connected");
-      // 직전에 예측된 칼로리가 있으면, 지금 바로 한 번 더 전송
-      if (lastCalories !== null){
-        console.log("Arduino connected, sending last calories:", lastCalories);
-        sendCaloriesToArduino(lastCalories);
+     // 직전에 예측된 칼로리가 있으면 한 번 더 보내기
+      if (lastCalories !== null) {
+        sendCaloriesToArduino(lastCalories);}
     }
     // 이미 연결되어 있으면 → 해제
     else {
@@ -1454,29 +1462,31 @@ async function sendCaloriesToArduino(totalCalories) {
   const useArduinoToggle = document.getElementById("use-arduino-toggle");
   const useArduino = useArduinoToggle ? useArduinoToggle.checked : false;
 
-  console.log("DEBUG sendCaloriesToArduino", {
-    totalCalories,
-    useArduino,
-    isArduinoConnected,
-    hasWriter: !!arduinoWriter
-  });
+  // 체크박스 꺼져 있으면 아두이노 사용 안 함
+  if (!useArduino) {
+    console.log("Use Arduino LED unchecked, skip sending.");
+    return;
+  }
 
-  // ✅ 디버깅을 위해 일단 체크박스는 무시하고,
-  //    "연결만 되어 있으면" 보내도록 바꿈
+  // 연결 안 되어 있으면 전송 X
   if (!isArduinoConnected || !arduinoWriter) {
-    console.log("Arduino NOT ready (connected:", isArduinoConnected,
-                "writer:", !!arduinoWriter, "). Skip sending.");
+    console.log(
+      "Arduino NOT ready (connected:",
+      isArduinoConnected,
+      "writer:",
+      !!arduinoWriter,
+      "). Skip sending."
+    );
     return;
   }
 
   let command = "";
-
   if (totalCalories > 700) {
-    command = "RED";       // 🔴 > 700
+    command = "RED";        // 🔴 > 700 kcal
   } else if (totalCalories >= 500) {
-    command = "BLUE";      // 🔵 500~700
+    command = "BLUE";       // 🔵 500–700 kcal
   } else {
-    command = "YELLOW";    // 🟡 < 500
+    command = "YELLOW";     // 🟡 < 500 kcal
   }
 
   try {
@@ -1486,6 +1496,7 @@ async function sendCaloriesToArduino(totalCalories) {
     console.error("Error sending data to Arduino:", err);
   }
 }
+
 
 
 
