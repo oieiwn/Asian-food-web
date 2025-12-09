@@ -50,6 +50,23 @@
         <label for="image-input" class="upload-btn">📸 Upload Food Image</label>
         <input type="file" id="image-input" accept="image/*" />
 
+        <!-- Arduino 연결 영역: 이미지 업로드/결과 부분 아래에 넣기 -->
+<div id="arduino-connection" style="margin-top: 1rem;">
+  <label style="margin-right: 8px;">
+    <input type="checkbox" id="use-arduino-toggle">
+    Use Arduino LED
+  </label>
+
+  <button id="connect-arduino-btn" type="button">
+    Connect Arduino
+  </button>
+
+  <span id="arduino-status" style="margin-left: 8px; font-size: 0.9rem;">
+    Not connected
+  </span>
+</div>
+
+
         <!-- 미리보기 -->
         <div class="preview-area">
           <img id="preview-image" alt="Preview will appear here" />
